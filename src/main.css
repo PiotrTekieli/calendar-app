@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  @apply text-gray-900;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  @apply p-1 m-1 border;
+}
+
+button.active {
+  @apply bg-blue-500 text-white;
+}
+
+.navLink {
+  @apply first:pl-24 p-4 px-8 font-semibold hover:text-blue-600;
+}
+
+.navLink.active {
+  @apply text-blue-600;
+}
+
+.react-calendar__tile {
+  @apply rounded !important;
+}
+
+.react-calendar__tile--now {
+  @apply bg-slate-300 hover:bg-slate-200 !important;
+}
+
+.react-calendar__tile--active {
+  @apply bg-blue-500 hover:bg-blue-400 !important;
+}
+
+.show-form, .hide-form {
+  --animationOffset: 10px;
+  --animationDuration: 0.1s;
+}
+
+@keyframes appearLeft {
+  0% {
+    translate: calc(var(--animationOffset) * -1) 0;
+    opacity: 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes appearRight {
+  0% {
+    translate: var(--animationOffset) 0;
+    opacity: 0;
+  }
+  100% {
+    translate: 0 0;
+  }
+}
+
+@keyframes disappearLeft {
+  0% {
+    translate: 0 0;
+  }
+  100% {
+    translate: calc(var(--animationOffset) * -1) 0;
+    opacity: 0;
+    visibility: hidden
+  }
+}
+
+@keyframes disappearRight {
+  0% {
+    translate: 0 0;
+  }
+  100% {
+    translate: var(--animationOffset) 0;
+    opacity: 0;
+    visibility: hidden
+  }
+}
+
+.show-form .entry-form {
+  @apply z-10;
+  animation: appearRight var(--animationDuration) ease-out;
+}
+
+.show-form .entry-list {
+  animation: disappearLeft var(--animationDuration) ease-out forwards;
+}
+
+.hide-form .entry-list {
+  @apply z-10;
+  animation: appearLeft var(--animationDuration) ease-out;
+}
+
+.hide-form .entry-form {
+  animation: disappearRight var(--animationDuration) ease-out forwards;
+
+}
