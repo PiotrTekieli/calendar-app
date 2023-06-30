@@ -54,7 +54,6 @@ class Entry {
                 nextDate = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, newDays, 0);
                 break;
         }
-        console.log(nextDate);
         this.dates = [...this.dates, nextDate];
     }
 
@@ -77,8 +76,6 @@ class Entry {
 
             var displayEntry = new DisplayEntry(this.id, this.name, this.dates[0], true);
             this.dates.splice(0, 1);
-
-            console.log(this);
 
             return displayEntry;
         }

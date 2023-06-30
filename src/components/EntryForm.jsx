@@ -7,6 +7,8 @@ import Entry from "../classes/entry";
 function EntryForm(props) {
     let [dayInputErrorText, setDayInputErrorText] = useState("");
 
+    let [entry, setEntry] = useState(props.entryToEdit);
+
     const dateRef = useRef(null);
     let date;
 
@@ -16,13 +18,13 @@ function EntryForm(props) {
 
     function handleClick() {
         let newEntry = new Entry()
-        newEntry.clone(props.entry);
+        newEntry.clone(entry);
 
         let days = 0;
 
         switch (newEntry.repeatType) {
             case 0:
-                days = parseInt(props.entry.days);
+                days = parseInt(entry.days);
                 if (days <= 0) {
                     setDayInputErrorText("Day amount cannot be lower than 1")
                     return;
@@ -37,10 +39,10 @@ function EntryForm(props) {
                 newEntry.days = days;
                 break;
             case 1:
-                days = props.entry.dates[0].getDay();
+                days = entry.dates[0].getDay();
                 break;
             case 2:
-                days = props.entry.dates[0].getDate();
+                days = entry.dates[0].getDate();
                 break;
             case 3:
                 days = -1;
@@ -73,37 +75,37 @@ function EntryForm(props) {
 
     return (
         <>
-            <input type="text" placeholder="Name of the entry" value={props.entry.name} onChange={(e) => props.setEntry({...props.entry, name: e.target.value})} onKeyDown={handleKeyDown} className="border-black border"></input>
+            <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} className="border-black border"></input>
             <br/>
 
             <div className="">
                 <Calendar ref={dateRef} minDetail="year"
-                value={props.entry.dates[0]} onChange={(value) => props.setEntry({...props.entry, dates: [value]})}
+                value={entry.dates[0]} onChange={(value) => setEntry({...entry, dates: [value]})}
                 activeStartDate={props.activeStartDate} onActiveStartDateChange={(a) => {props.setActiveStartDate(a.activeStartDate)}} />
             </div>
 
             {["Every X Days", "Day of the Week", "Day of the Month", "One Time"].map((text, i) => {
-                return <button key={i} className={props.entry.repeatType == i ? "active" : ""} onClick={() => {
-                    if (props.entry.repeatType != i) {
-                        props.setEntry({...props.entry, repeatType: i, days: props.entry.days <= 0 ? 1 : props.entry.days});
+                return <button key={i} className={entry.repeatType == i ? "active" : ""} onClick={() => {
+                    if (entry.repeatType != i) {
+                        setEntry({...entry, repeatType: i, days: entry.days <= 0 ? 1 : entry.days});
                         setDayInputErrorText("");
                     }
                 }
                 }>{text}</button>
             })}
 
-            {props.entry.repeatType == 0 && (
+            {entry.repeatType == 0 && (
                 <>
                     <br/>
-                    <input type="number" placeholder="Day amount" value={props.entry.days} onChange={(e) => { props.setEntry({...props.entry, days: e.target.value }) }} id="repeatDays" />
+                    <input type="number" placeholder="Day amount" value={entry.days} onChange={(e) => { setEntry({...entry, days: e.target.value }) }} id="repeatDays" />
                     <span className="text-red-500">{dayInputErrorText}</span>
                 </>
             )}
-            {props.entry.repeatType == 1 && (
+            {entry.repeatType == 1 && (
                 <>
                     <br/>
                     {daysOfTheWeek.map((day, i) => {
-                        return <button key={i} className={props.entry.dates[0].getDay() == i + 1 + (i == 6 ? -7 : 0) ? "active" : ""} onClick={() => {
+                        return <button key={i} className={entry.dates[0].getDay() == i + 1 + (i == 6 ? -7 : 0) ? "active" : ""} onClick={() => {
                             let today = new Date(new Date().setHours(0, 0, 0, 0));
                             let offset = (i + 1) - today.getDay();
 
@@ -112,7 +114,7 @@ function EntryForm(props) {
 
                             let newDate = new Date(today.setDate(today.getDate() + offset))
 
-                            props.setEntry({...props.entry, dates: [newDate]});
+                            setEntry({...entry, dates: [newDate]});
                             setNewActiveStartDate(newDate);
                         }}>{day}</button>
                     })}

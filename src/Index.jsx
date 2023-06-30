@@ -2,12 +2,12 @@ import { useState } from "react";
 
 import EntryList from "./components/EntryList";
 import EntryForm from './components/EntryForm';
-import { v4 as uuidv4 } from "uuid";
 import Entry from "./classes/entry";
 
 
 export default function Index() {
     const DEBUG_DATE = true;
+    const HISTORY_AMOUNT = 30;
 
     let [today, setToday] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
 
@@ -15,15 +15,48 @@ export default function Index() {
     let [delayedFormDisplay, setDelayedForm] = useState(false);
 
     let [entryList, setEntryList] = useState([]);
+    let [historyList, setHistoryList] = useState([]);
 
-    const handleSubmit = (entry) => {
+    console.log("Loaded")
+    // LOADING
+    // if (entryList.length == 0) {
+    //     setEntryList([]);
+    //     setHistoryList([]);
+    // }
+
+    function populateHistory() {
+        let repeat;
+        let historyListToAdd = []
+        do {
+            repeat = false;
+            entryList.forEach(entry => {
+                let historyDisplayEntry = entry.moveToHistoryIfNeeded(today);
+                if (historyDisplayEntry) {
+                    repeat = true;
+                    historyListToAdd = [...historyListToAdd.slice(-HISTORY_AMOUNT + 1), historyDisplayEntry]
+                }
+            })
+        } while(repeat)
+
+        if (historyListToAdd.length != 0) {
+            let oldHistoryList = [];
+
+            if (-HISTORY_AMOUNT + historyListToAdd.length != 0)
+                oldHistoryList = historyList.slice(-HISTORY_AMOUNT + historyListToAdd.length);
+
+            let newHistoryList = [...oldHistoryList, ...historyListToAdd]
+            setHistoryList(newHistoryList);
+        }
+    }
+
+    function handleSubmit(entry) {
         let filteredEntryList = entryList.filter(e => e.id !== entry.id)
 
         setEntryList([...filteredEntryList, entry]);
         showEditingForm(false);
     }
 
-    const deleteItem = (id) => {
+    function deleteItem(id) {
         setEntryList(l => {
             let index = l.findIndex(entry => entry.id == id);
             if (index >= 0)
@@ -32,7 +65,7 @@ export default function Index() {
         })
     }
 
-    const editEntry = (id = null) => {
+    function editEntry(id = null) {
         let entry = entryList.find(e => e.id == id);
         if (!entry)
             entry = new Entry();
@@ -40,13 +73,12 @@ export default function Index() {
         showEditingForm(true, entry);
     }
 
-    const showEditingForm = (state, entry) => {
+    function showEditingForm(state, entry) {
         setEditingForm(state);
         setTimeout(() => setDelayedForm(state), 100);
 
         if (state) {
             setEntryToEdit(entry);
-
             setActiveStartDate(entry.getBeginningOfMonth());
         }
 
@@ -57,7 +89,7 @@ export default function Index() {
 
     let formProps = {
         handleSubmit,
-        entry: entryToEdit, setEntry: setEntryToEdit,
+        entryToEdit,
         activeStartDate, setActiveStartDate,
     }
 
@@ -70,7 +102,7 @@ export default function Index() {
 
                         <button className="bg-blue-400" onClick={editEntry}>New</button>
 
-                        <EntryList date={today} entryList={entryList} edit={editEntry} delete={deleteItem} submit={handleSubmit}/>
+                        <EntryList date={today} entryList={entryList} historyList={historyList} populateHistory={populateHistory} edit={editEntry} delete={deleteItem} submit={handleSubmit}/>
                     </div>
                 )}
                 {delayedFormDisplay && (

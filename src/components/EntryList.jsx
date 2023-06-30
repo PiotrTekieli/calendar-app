@@ -1,30 +1,33 @@
 import { useEffect, useState } from "react";
-import DisplayEntry from "../classes/displayEntry";
 import ListElement from "./ListElement";
 
-function EntryList({ date, entryList, edit, delete: del, submit: handleSubmit }) {
-    let [historyList, setHistoryList] = useState([]);
+function EntryList({ date, entryList, historyList, populateHistory, edit, delete: del, submit: handleSubmit }) {
+
+    let [showShort, setShowShort] = useState(true);
+
+    // let [shortHistoryList, setShortHistoryList] = useState(historyList.slice(-3));
 
     useEffect(() => {
-        entryList.forEach(entry => {
-            let historyDisplayEntry = entry.moveToHistoryIfNeeded(date);
-            if (historyDisplayEntry) {
-                setHistoryList([...historyList, historyDisplayEntry]);
-            }
-        })
+        populateHistory();
     })
 
+    let displayEntryList = [];
 
-    var fullEntryList = historyList.slice(-3);
+    if (showShort)
+        displayEntryList = historyList.slice(-3);
+    else
+        displayEntryList = historyList;
 
     entryList.forEach(entry => {
-        fullEntryList = [...fullEntryList, ...entry.getDisplayEntries()];
+        displayEntryList = [...displayEntryList, ...entry.getDisplayEntries()];
     })
-    fullEntryList.sort((a, b) => a.date.getTime() - b.date.getTime())
+    displayEntryList.sort((a, b) => a.date.getTime() - b.date.getTime())
+
 
     return (
         <>
-            {fullEntryList && fullEntryList.map((entry) =>
+            <button onClick={() => { setShowShort(!showShort) }}>{showShort ? "Show More" : "Show Less"}</button>
+            {displayEntryList && displayEntryList.map((entry) =>
                 <ListElement key={entry.id + entry.date} date={date} entry={entry} edit={edit} delete={del} submit={handleSubmit} />
             )}
         </>
