@@ -16,7 +16,9 @@ function ListElement({ date, entry, edit, delete: del, submit }) {
                     {entry.name == "" ? "Untitled" : entry.name}, In {dayDifference} days, {formatDate(entry.date)}
                 </span>
 
-                <button onClick={() => edit(entry.id)} className="bg-gray-500">edit</button>
+                {!entry.history && (
+                    <button onClick={() => edit(entry.id)} className="bg-gray-500">edit</button>
+                )}
                 <button onClick={() => del(entry.id)} className="bg-red-500">X</button>
             </li>
         </>

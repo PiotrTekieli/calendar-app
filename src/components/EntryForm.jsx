@@ -6,6 +6,8 @@ import Entry from "../classes/entry";
 
 function EntryForm(props) {
     let [dayInputErrorText, setDayInputErrorText] = useState("");
+    let [copyCountErrorText, setCopyCountErrorText] = useState("");
+
 
     let [entry, setEntry] = useState(props.entryToEdit);
 
@@ -14,27 +16,35 @@ function EntryForm(props) {
 
     useEffect(() => {
         date = dateRef.current;
-    })
+        console.log(props.entryToEdit.dates[0])
+    }, [])
 
     function handleClick() {
         let newEntry = new Entry()
         newEntry.clone(entry);
 
+        let detectError = false;
         let days = 0;
 
         switch (newEntry.repeatType) {
             case 0:
-                days = parseInt(entry.days);
-                if (days <= 0) {
-                    setDayInputErrorText("Day amount cannot be lower than 1")
-                    return;
-                }
-                else if (isNaN(days)) {
-                    setDayInputErrorText("Incorrect day amount")
-                    return;
-                }
-                else
-                    setDayInputErrorText("");
+                // days = parseInt(entry.days);
+                // if (days <= 0) {
+                //     setDayInputErrorText("Day amount cannot be lower than 1")
+                //     return;
+                // }
+                // else if (isNaN(days)) {
+                //     setDayInputErrorText("Incorrect day amount")
+                //     return;
+                // }
+                // else
+                //     setDayInputErrorText("");
+                days = checkIfNumberAndPositive(entry.days, setDayInputErrorText);
+                if (days == 0) {
+                    setDayInputErrorText("Day repeat cannot be 0");
+                    detectError = true;
+                } else if (days == null)
+                    detectError = true;
 
                 newEntry.days = days;
                 break;
@@ -49,7 +59,16 @@ function EntryForm(props) {
                 break;
         }
 
+        newEntry.copyCount = checkIfNumberAndPositive(entry.copyCount, setCopyCountErrorText);
+        if (newEntry.copyCount == null)
+            detectError = true;
+
+
         newEntry.days = days;
+
+        if (detectError)
+            return;
+
         newEntry.recalculateNextDates();
 
         props.handleSubmit(newEntry);
@@ -66,6 +85,22 @@ function EntryForm(props) {
         props.setActiveStartDate(beginningOfMonth);
     }
 
+    function checkIfNumberAndPositive(number, setErrorCallback) {
+        var n = parseInt(number);
+        if (n < 0) {
+            setErrorCallback("Value cannot be lower than 1");
+            return null;
+        }
+        else if (isNaN(n)) {
+            setErrorCallback("Invalid number");
+            return null;
+        }
+        else
+            setErrorCallback("");
+
+        return n;
+    }
+
     // 0 = Every X days
     // 1 = Day of the Week
     // 2 = Day of the Month
@@ -75,7 +110,7 @@ function EntryForm(props) {
 
     return (
         <>
-            <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} className="border-black border"></input>
+            <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} className="border-black border"/>
             <br/>
 
             <div className="">
@@ -97,8 +132,8 @@ function EntryForm(props) {
             {entry.repeatType == 0 && (
                 <>
                     <br/>
-                    <input type="number" placeholder="Day amount" value={entry.days} onChange={(e) => { setEntry({...entry, days: e.target.value }) }} id="repeatDays" />
-                    <span className="text-red-500">{dayInputErrorText}</span>
+                    Day amount: <input type="number" placeholder="Day amount" value={entry.days} onChange={(e) => { setEntry({...entry, days: e.target.value }) }} id="repeatDays" />
+                    <span className="text-red-500"> {dayInputErrorText}</span>
                 </>
             )}
             {entry.repeatType == 1 && (
@@ -120,6 +155,10 @@ function EntryForm(props) {
                     })}
                 </>
             )}
+
+            <br/>
+            Copy Count: <input type="number" placeholder="Display copy count" value={entry.copyCount} onChange={(e) => setEntry({...entry, copyCount: e.target.value})} onKeyDown={handleKeyDown} />
+            <span className="text-red-500"> {copyCountErrorText}</span>
             <br/>
 
             <button onClick={handleClick}>Confirm</button>

@@ -5,7 +5,11 @@ class Entry {
     constructor() {
         this.id = uuidv4();
         this.name = "";
-        this.dates = [new Date()];
+
+        let time = new Date().getTime();
+        time = time - (time % 86400000);
+        this.dates = [new Date(time)];
+
         this.repeatType = 0;
         this.days = 1;
         this.copyCount = 1;
@@ -20,6 +24,31 @@ class Entry {
         this.copyCount = entry.copyCount;
 
         return this;
+    }
+
+    loadSimplifiedEntry(simplifiedEntry) {
+        this.name = simplifiedEntry.name;
+
+        this.dates = [];
+        simplifiedEntry.dates.forEach(date => {
+            this.dates.push(new Date(date));
+        })
+
+        this.repeatType = simplifiedEntry.repeatType;
+        this.days = simplifiedEntry.days;
+        this.copyCount = simplifiedEntry.copyCount;
+
+        return this;
+    }
+
+    simplifyEntry() {
+        return {
+            name: this.name,
+            dates: this.dates,
+            repeatType: this.repeatType,
+            days: this.days,
+            copyCount: this.copyCount,
+        }
     }
 
     recalculateNextDates() {
@@ -74,7 +103,7 @@ class Entry {
         if (today.getTime() - this.dates[0].getTime() > 0) {
             this.addNextDate();
 
-            var displayEntry = new DisplayEntry(this.id, this.name, this.dates[0], true);
+            var displayEntry = new DisplayEntry(undefined, this.name, this.dates[0], true);
             this.dates.splice(0, 1);
 
             return displayEntry;

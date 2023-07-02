@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import EntryList from "./components/EntryList";
 import EntryForm from './components/EntryForm';
 import Entry from "./classes/entry";
+import DisplayEntry from "./classes/displayEntry";
 
 
 export default function Index() {
@@ -17,12 +18,61 @@ export default function Index() {
     let [entryList, setEntryList] = useState([]);
     let [historyList, setHistoryList] = useState([]);
 
-    console.log("Loaded")
     // LOADING
-    // if (entryList.length == 0) {
-    //     setEntryList([]);
-    //     setHistoryList([]);
-    // }
+    useEffect(() => {
+        // let loadedEntryList = JSON.parse(`[{"name":"","dates":["2023-07-02T00:00:00.000Z","2023-07-03T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1},{"name":"","dates":["2023-07-11T00:00:00.000Z","2023-07-12T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1}]`);
+        let loadedEntryList = JSON.parse(localStorage.getItem("entryList"));
+        let parsedEntryList = [];
+        if (loadedEntryList) {
+            loadedEntryList.forEach(e => {
+                parsedEntryList.push(new Entry().loadSimplifiedEntry(e));
+            })
+        }
+
+        // console.log(parsedEntryList)
+        setEntryList(parsedEntryList);
+
+        // let loadedHistoryList = JSON.parse(`[{"name":"","date":"2023-06-02T00:00:00.000Z"},{"name":"","date":"2023-06-03T00:00:00.000Z"},{"name":"","date":"2023-06-04T00:00:00.000Z"},{"name":"","date":"2023-06-05T00:00:00.000Z"}]`);
+        let loadedHistoryList = JSON.parse(localStorage.getItem("historyList"));
+        let parsedHistoryList = [];
+        if (loadedHistoryList) {
+            loadedHistoryList.forEach(e => {
+                parsedHistoryList.push(new DisplayEntry().loadSimplifiedDisplayEntry(e));
+            })
+        }
+
+        // console.log(parsedHistoryList)
+        setHistoryList(parsedHistoryList);
+
+        console.log("Loaded")
+    }, [])
+    if (entryList.length == 0) {
+        //let loadedEntryList = JSON.parse(`[{"name":"","dates":["2023-07-02T00:00:00.000Z","2023-07-03T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1},{"name":"","dates":["2023-07-11T22:00:00.000Z","2023-07-12T22:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1}]`);
+        //console.log(loadedEntryList);
+        //setEntryList(loadedEntryList);
+        //setHistoryList([]);
+    }
+
+    function saveEntryList(newList) {
+        setEntryList(newList);
+        let simplifiedList = [];
+        console.log(newList)
+        newList.forEach(e => {
+            simplifiedList.push(e.simplifyEntry())
+        })
+        console.log(JSON.stringify([...simplifiedList]));
+        localStorage.setItem("entryList", JSON.stringify([...simplifiedList]));
+    }
+
+    function saveHistoryList(newList) {
+        setHistoryList(newList);
+        let simplifiedList = [];
+        newList.forEach(e => {
+            simplifiedList.push(e.simplifyHistoryEntry())
+        })
+        console.log(JSON.stringify([...simplifiedList]));
+        localStorage.setItem("historyList", JSON.stringify([...simplifiedList]));
+    }
 
     function populateHistory() {
         let repeat;
@@ -45,24 +95,38 @@ export default function Index() {
                 oldHistoryList = historyList.slice(-HISTORY_AMOUNT + historyListToAdd.length);
 
             let newHistoryList = [...oldHistoryList, ...historyListToAdd]
-            setHistoryList(newHistoryList);
+            saveHistoryList(newHistoryList);
         }
     }
 
     function handleSubmit(entry) {
         let filteredEntryList = entryList.filter(e => e.id !== entry.id)
 
-        setEntryList([...filteredEntryList, entry]);
+        saveEntryList([...filteredEntryList, entry]);
         showEditingForm(false);
     }
 
     function deleteItem(id) {
-        setEntryList(l => {
-            let index = l.findIndex(entry => entry.id == id);
-            if (index >= 0)
-            return l.splice(index, 1);
-            return l;
-        })
+        let index = entryList.findIndex(entry => entry.id == id)
+        console.log(id, entryList, historyList);
+
+        if (index >= 0) {
+            let l = entryList;
+            l.splice(index, 1);
+            saveEntryList([...l]);
+        } else {
+            index = historyList.findIndex(entry => entry.id == id)
+            let h = historyList;
+            h.splice(index, 1);
+            saveHistoryList([...h]);
+        }
+
+        // setEntryList(l => {
+        //     let index = l.findIndex(entry => entry.id == id);
+        //     if (index >= 0)
+        //         return l.splice(index, 1);
+        //     return l;
+        // })
     }
 
     function editEntry(id = null) {
