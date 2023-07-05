@@ -4,10 +4,13 @@ import EntryList from "./components/EntryList";
 import EntryForm from './components/EntryForm';
 import Entry from "./classes/entry";
 import DisplayEntry from "./classes/displayEntry";
+import Arrow from "./components/Arrow";
 
 
 export default function Index() {
     const DEBUG_DATE = true;
+    const LOADING = true;
+    const SAVING = false;
     const HISTORY_AMOUNT = 30;
 
     let [today, setToday] = useState(new Date(new Date().setHours(0, 0, 0, 0)));
@@ -20,6 +23,8 @@ export default function Index() {
 
     // LOADING
     useEffect(() => {
+        if (!LOADING)
+            return;
         // let loadedEntryList = JSON.parse(`[{"name":"","dates":["2023-07-02T00:00:00.000Z","2023-07-03T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1},{"name":"","dates":["2023-07-11T00:00:00.000Z","2023-07-12T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1}]`);
         let loadedEntryList = JSON.parse(localStorage.getItem("entryList"));
         let parsedEntryList = [];
@@ -55,22 +60,26 @@ export default function Index() {
 
     function saveEntryList(newList) {
         setEntryList(newList);
+
+        if (!SAVING)
+            return;
         let simplifiedList = [];
         console.log(newList)
         newList.forEach(e => {
             simplifiedList.push(e.simplifyEntry())
         })
-        console.log(JSON.stringify([...simplifiedList]));
         localStorage.setItem("entryList", JSON.stringify([...simplifiedList]));
     }
 
     function saveHistoryList(newList) {
         setHistoryList(newList);
+
+        if (!SAVING)
+            return;
         let simplifiedList = [];
         newList.forEach(e => {
             simplifiedList.push(e.simplifyHistoryEntry())
         })
-        console.log(JSON.stringify([...simplifiedList]));
         localStorage.setItem("historyList", JSON.stringify([...simplifiedList]));
     }
 
@@ -159,7 +168,7 @@ export default function Index() {
 
     return (
         <>
-            <div className={"p-12 " + (editingForm ? "show-form" : "hide-form")}>
+            <div className={"p-2 md:p-8 " + (editingForm ? "show-form" : "hide-form")}>
                 {!delayedFormDisplay && (
                     <div className="entry-list absolute">
                         {DEBUG_DATE && (<>Debug Set Date: <input type="date" onChange={e => setToday(e.target.valueAsDate)}/> <button onClick={() => setToday(new Date())}>Reset</button><br/></>)}
@@ -170,9 +179,12 @@ export default function Index() {
                     </div>
                 )}
                 {delayedFormDisplay && (
-                    <div className="entry-form absolute">
-                        <button className="bg-blue-400" onClick={() => showEditingForm(false)}>Back</button> <br/>
-
+                    <div className="entry-form w-full">
+                        {/* <button className="bg-blue-400" onClick={() => showEditingForm(false)}>Back</button> <br/> */}
+                        <div className="flex p-3 md:p-0">
+                            <Arrow faceLeft={true} onClick={() => showEditingForm(false)} />
+                            <h1 className="text-2xl h-10 inline-block">Reminder Settings</h1>
+                        </div>
                         <EntryForm {...formProps} />
 
                         <p>currently editing {entryToEdit?.id ?? "nothing"}</p>

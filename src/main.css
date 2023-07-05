@@ -107,5 +107,8 @@ button.active {
 
 .hide-form .entry-form {
   animation: disappearRight var(--animationDuration) ease-out forwards;
+}
 
+.form .label {
+  @apply p-2;
 }
