@@ -10,6 +10,7 @@ function EntryForm(props) {
 
 
     let [entry, setEntry] = useState(props.entryToEdit);
+    let [daysOfTheWeek, setDaysOfTheWeek] = useState(String(props.entryToEdit.days).split("").map(n => Number(n)));
 
     const dateRef = useRef(null);
     let date;
@@ -38,7 +39,12 @@ function EntryForm(props) {
                 newEntry.days = days;
                 break;
             case 1:
-                days = entry.dates[0].getDay();
+                // days = entry.dates[0].getDay();
+                if (daysOfTheWeek.length == 0) {
+                    setDayInputErrorText("Select at least one day")
+                    detectError = true;
+                }
+                days = parseInt(daysOfTheWeek.join(""));
                 break;
             case 2:
                 days = entry.dates[0].getDate();
@@ -95,7 +101,7 @@ function EntryForm(props) {
     // 2 = Day of the Month
     // 3 = One Time
 
-    var daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday", "Sunday"];
+    var Week = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday", "Sunday"];
 
     return (
         <>
@@ -111,6 +117,7 @@ function EntryForm(props) {
                             return <button key={i} className={(entry.repeatType == i ? "active " : "")+ (i == 0 ? "rounded-tl-[0.3em] " : "") + (i == 3 ? "rounded-tr-[0.3em] " : "border-r ") + "m-0 py-2 px-4 flex-1 border-0"} onClick={() => {
                                 if (entry.repeatType != i) {
                                     setEntry({...entry, repeatType: i, days: entry.days <= 0 ? 1 : entry.days});
+                                    setDaysOfTheWeek([]);
                                     setDayInputErrorText("");
                                 }
                             }
@@ -139,16 +146,39 @@ function EntryForm(props) {
                         <>
                             <br/>
                             <div className="m-3 flex flex-wrap border border-gray-800">
-                                {daysOfTheWeek.map((day, i) => {
+                                {Week.map((day, i) => {
                                     return <Fragment key={i}>
-                                            <button className={(entry.dates[0].getDay() == i + 1 + (i == 6 ? -7 : 0) ? "active " : "") + (i != 6 ? "border-r " : "") + "flex-1 m-0 p-2 border-0"} onClick={() => {
+                                            <button className={(daysOfTheWeek.includes(i + 1) ? "active " : "") + (i != 6 ? "border-r " : "") + "flex-1 m-0 p-2 border-0"} onClick={() => {
+                                                let offset = i + 1;
+                                                let index = daysOfTheWeek.findIndex(i => i == offset);
+
+                                                let newList;
+                                                if (index == -1) {
+                                                    newList = [...daysOfTheWeek, offset].sort();
+                                                    setDaysOfTheWeek(newList);
+                                                }
+                                                else {
+                                                    newList = [...daysOfTheWeek];
+                                                    newList.splice(index, 1);
+                                                    setDaysOfTheWeek(newList);
+                                                }
+
                                                 let today = new Date(new Date().setHours(0, 0, 0, 0));
-                                                let offset = (i + 1) - today.getDay();
 
-                                                if (offset <= 0)
-                                                    offset += 7;
+                                                let nextDay = -1;
+                                                newList.forEach(d => {
+                                                    if (nextDay == -1 && d > today.getDay()) {
+                                                        nextDay = d;
+                                                    }
+                                                })
+                                                if (nextDay == -1)
+                                                    nextDay = newList[0];
 
-                                                let newDate = new Date(today.setDate(today.getDate() + offset))
+                                                let dayDifference = nextDay - today.getDay();
+                                                if (dayDifference <= 0)
+                                                    dayDifference += 7;
+
+                                                let newDate = new Date(today.setDate(today.getDate() + dayDifference))
 
                                                 setEntry({...entry, dates: [newDate]});
                                                 setNewActiveStartDate(newDate);
@@ -159,6 +189,7 @@ function EntryForm(props) {
                                         </Fragment>
                                 })}
                             </div>
+                            <span className="text-red-500"> {dayInputErrorText}</span>
                         </>
                     )}
 

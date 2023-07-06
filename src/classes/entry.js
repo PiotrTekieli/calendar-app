@@ -53,7 +53,6 @@ class Entry {
 
     recalculateNextDates() {
         this.dates = [this.dates[0]];
-
         for(let i = 0; i < this.copyCount; i++) {
             this.addNextDate();
         }
@@ -70,7 +69,27 @@ class Entry {
                 nextDate.setDate(nextDate.getDate() + this.days);
                 break;
             case 1:
-                nextDate.setDate(nextDate.getDate() + 7);
+                let day = nextDate.getDay();
+                if (day == 0)
+                    day = 7;
+
+                let days = String(this.days).split("").map(n => Number(n));
+
+                let nextDay = -1;
+                days.forEach(d => {
+                    if (nextDay == -1 && d > day) {
+                        nextDay = d;
+                    }
+                })
+
+                if (nextDay == -1)
+                    nextDay = days[0];
+
+                let dayDifference = nextDay - day;
+                if (dayDifference <= 0)
+                    dayDifference += 7;
+                nextDate.setDate(nextDate.getDate() + dayDifference);
+
                 break;
             case 2:
                 let newDays;

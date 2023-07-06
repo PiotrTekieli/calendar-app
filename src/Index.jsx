@@ -9,7 +9,7 @@ import Arrow from "./components/Arrow";
 
 export default function Index() {
     const DEBUG_DATE = true;
-    const LOADING = true;
+    const LOADING = false;
     const SAVING = false;
     const HISTORY_AMOUNT = 30;
 
