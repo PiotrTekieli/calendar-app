@@ -1,26 +1,30 @@
 import { v4 as uuidv4 } from "uuid";
 
 function ListElement({ date, entry, edit, delete: del, submit }) {
-    var dayDifference;
-    var timeDifference = new Date(entry.date).setHours(0, 0, 0, 0) - date.getTime();
+    let dayDifference;
+    let timeDifference = new Date().loadSimpleFormat(entry.date) - date.getTime();
     dayDifference = Math.round(timeDifference / (1000 * 3600 * 24));
 
     const formatDate = (date) => {
-        return date.toLocaleDateString("en-UK");
+        return new Date().loadSimpleFormat(date).toLocaleDateString("en-UK");
     }
 
     return (
         <>
-            <li>
-                <span className={entry.history == true ? "text-gray-400" : ""}>
-                    {entry.name == "" ? "Untitled" : entry.name}, In {dayDifference} days, {formatDate(entry.date)}
-                </span>
+            <tr className={(entry.history == true ? "text-gray-400 " : "") + "hover:bg-gray-100 p-1 gap-4"}>
+                <td><b>{entry.name == "" ? "Untitled" : entry.name}</b></td>
+                <td className="whitespace-nowrap">In {dayDifference} days</td>
+                <td>{formatDate(entry.date)}</td>
 
-                {!entry.history && (
-                    <button onClick={() => edit(entry.id)} className="bg-gray-500">edit</button>
-                )}
-                <button onClick={() => del(entry.id)} className="bg-red-500">X</button>
-            </li>
+                <td>
+                    {!entry.history && (
+                        <button onClick={() => edit(entry.id)} className="border-blue-500 hover:bg-blue-100 hover:brightness-100">Edit</button>
+                    )}
+                </td>
+                <td>
+                    <button onClick={() => del(entry.id)} className="border-0 font-bold text-red-700 text-lg">X</button>
+                </td>
+            </tr>
         </>
     );
 }

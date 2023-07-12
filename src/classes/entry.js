@@ -6,10 +6,7 @@ class Entry {
         this.id = uuidv4();
         this.name = "";
 
-        let time = new Date().getTime();
-        time = time - (time % 86400000);
-        this.dates = [new Date(time)];
-
+        this.dates = [new Date(new Date().setHours(0, 0, 0, 0)).simpleFormat()];
         this.repeatType = 0;
         this.days = 1;
         this.copyCount = 1;
@@ -28,23 +25,19 @@ class Entry {
 
     loadSimplifiedEntry(simplifiedEntry) {
         this.name = simplifiedEntry.name;
-
-        this.dates = [];
-        simplifiedEntry.dates.forEach(date => {
-            this.dates.push(new Date(date));
-        })
-
+        this.dates = [simplifiedEntry.date];
         this.repeatType = simplifiedEntry.repeatType;
         this.days = simplifiedEntry.days;
         this.copyCount = simplifiedEntry.copyCount;
 
+        this.recalculateNextDates();
         return this;
     }
 
     simplifyEntry() {
         return {
             name: this.name,
-            dates: this.dates,
+            date: this.dates[0],
             repeatType: this.repeatType,
             days: this.days,
             copyCount: this.copyCount,
@@ -59,7 +52,7 @@ class Entry {
     }
 
     addNextDate() {
-        let nextDate = new Date(this.dates[this.dates.length-1]);
+        let nextDate = new Date().loadSimpleFormat(this.dates[this.dates.length-1]);
 
         if (this.repeatType == 3)
             return;
@@ -102,16 +95,17 @@ class Entry {
                 nextDate = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, newDays, 0);
                 break;
         }
-        this.dates = [...this.dates, nextDate];
+        this.dates = [...this.dates, nextDate.simpleFormat()];
     }
 
     getBeginningOfMonth() {
-        const beginningOfMonth = new Date(this.dates[0].getFullYear(), this.dates[0].getMonth(), 1);
+        let firstDate = new Date().loadSimpleFormat(this.dates[0])
+        const beginningOfMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
         return beginningOfMonth;
     }
 
     getDisplayEntries() {
-        var displayEntries = []
+        let displayEntries = []
         this.dates.forEach(date => {
             displayEntries.push(new DisplayEntry(this.id, this.name, date))
         })
@@ -119,10 +113,10 @@ class Entry {
     }
 
     moveToHistoryIfNeeded(today) {
-        if (today.getTime() - this.dates[0].getTime() > 0) {
+        if (today.getTime() - new Date().loadSimpleFormat(this.dates[0]).getTime() > 0) {
             this.addNextDate();
 
-            var displayEntry = new DisplayEntry(undefined, this.name, this.dates[0], true);
+            let displayEntry = new DisplayEntry(undefined, this.name, this.dates[0], true);
             this.dates.splice(0, 1);
 
             return displayEntry;

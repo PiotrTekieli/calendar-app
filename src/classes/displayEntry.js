@@ -17,7 +17,7 @@ class DisplayEntry {
 
     loadSimplifiedDisplayEntry(simplifiedEntry) {
         this.name = simplifiedEntry.name,
-        this.date = new Date(simplifiedEntry.date);
+        this.date = simplifiedEntry.date;
         this.history = true;
 
         return this;

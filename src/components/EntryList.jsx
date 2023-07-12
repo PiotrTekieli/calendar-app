@@ -5,8 +5,6 @@ function EntryList({ date, entryList, historyList, populateHistory, edit, delete
 
     let [showShort, setShowShort] = useState(true);
 
-    // let [shortHistoryList, setShortHistoryList] = useState(historyList.slice(-3));
-
     useEffect(() => {
         populateHistory();
     })
@@ -21,15 +19,25 @@ function EntryList({ date, entryList, historyList, populateHistory, edit, delete
     entryList.forEach(entry => {
         displayEntryList = [...displayEntryList, ...entry.getDisplayEntries()];
     })
-    displayEntryList.sort((a, b) => a.date.getTime() - b.date.getTime())
+
+    displayEntryList.sort((a, b) => {
+        let difference = a.date.localeCompare(b.date);
+        if (difference == 0)
+            return a.name.localeCompare(b.name);
+        return difference;
+    })
 
 
     return (
         <>
             <button onClick={() => { setShowShort(!showShort) }}>{showShort ? "Show More" : "Show Less"}</button>
-            {displayEntryList && displayEntryList.map((entry) =>
-                <ListElement key={entry.id + entry.date} date={date} entry={entry} edit={edit} delete={del} submit={handleSubmit} />
-            )}
+            <table className="w-full min-w-min max-w-[800px]">
+                <tbody>
+                    {displayEntryList && displayEntryList.map((entry, i) => {
+                        return <ListElement key={entry.id + entry.date} date={date} entry={entry} edit={edit} delete={del} submit={handleSubmit} />
+                    })}
+                </tbody>
+            </table>
         </>
     );
 }

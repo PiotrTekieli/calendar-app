@@ -16,12 +16,20 @@
   -webkit-text-size-adjust: 100%;
 }
 
+input {
+  @apply p-1 m-1 w-52 border border-0 border-b border-gray-800;
+}
+
 button {
-  @apply p-1 m-1 border;
+  @apply p-1 px-3 mx-1 border hover:brightness-75;
 }
 
 button.active {
   @apply bg-blue-500 text-white;
+}
+
+table td {
+  @apply p-1;
 }
 
 .navLink {

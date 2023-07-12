@@ -12,6 +12,9 @@ function EntryForm(props) {
     let [entry, setEntry] = useState(props.entryToEdit);
     let [daysOfTheWeek, setDaysOfTheWeek] = useState(String(props.entryToEdit.days).split("").map(n => Number(n)));
 
+    let [selectedDate, setSelectedDate] = useState(new Date(props.entryToEdit.dates[0]));
+    let [activeStartDate, setActiveStartDate] = useState(props.entryToEdit.getBeginningOfMonth());
+
     const dateRef = useRef(null);
     let date;
 
@@ -58,8 +61,10 @@ function EntryForm(props) {
         if (newEntry.copyCount == null)
             detectError = true;
 
-
         newEntry.days = days;
+
+        newEntry.dates = [selectedDate.simpleFormat()];
+        console.log(newEntry)
 
         if (detectError)
             return;
@@ -77,11 +82,11 @@ function EntryForm(props) {
 
     function setNewActiveStartDate(date) {
         const beginningOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-        props.setActiveStartDate(beginningOfMonth);
+        setActiveStartDate(beginningOfMonth);
     }
 
     function checkIfNumberAndPositive(number, setErrorCallback) {
-        var n = parseInt(number);
+        let n = parseInt(number);
         if (n < 0) {
             setErrorCallback("Value cannot be lower than 1");
             return null;
@@ -101,13 +106,13 @@ function EntryForm(props) {
     // 2 = Day of the Month
     // 3 = One Time
 
-    var Week = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday", "Sunday"];
+    let Week = ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday", "Sunday"];
 
     return (
         <>
             <div className="form p-3 w-full min-w-min">
                 <label className="label">Name: </label>
-                <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} className="border-black border"/>
+                <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} />
                 <br/><br/>
 
                 <label className="label">Repeat Type: </label>
@@ -129,8 +134,8 @@ function EntryForm(props) {
                         <div className="">
                             <label className="label">Starting Date: </label>
                             <Calendar ref={dateRef} minDetail="year"
-                            value={entry.dates[0]} onChange={(value) => setEntry({...entry, dates: [value]})}
-                            activeStartDate={props.activeStartDate} onActiveStartDateChange={(a) => {props.setActiveStartDate(a.activeStartDate)}} />
+                            value={selectedDate} onChange={(value) => setSelectedDate(value)}
+                            activeStartDate={activeStartDate} onActiveStartDateChange={(a) => {setActiveStartDate(a.activeStartDate)}} />
                         </div>
                     </div>
 

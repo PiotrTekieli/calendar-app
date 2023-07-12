@@ -9,7 +9,7 @@ import Arrow from "./components/Arrow";
 
 export default function Index() {
     const DEBUG_DATE = true;
-    const LOADING = false;
+    const LOADING = true;
     const SAVING = false;
     const HISTORY_AMOUNT = 30;
 
@@ -21,12 +21,32 @@ export default function Index() {
     let [entryList, setEntryList] = useState([]);
     let [historyList, setHistoryList] = useState([]);
 
+    Date.prototype.simpleFormat = function() {
+        let mm = this.getMonth() + 1; // getMonth() is zero-based
+        let dd = this.getDate();
+
+        return [this.getFullYear(),
+                (mm>9 ? '' : '0') + mm,
+                (dd>9 ? '' : '0') + dd
+               ].join('-');
+    };
+
+    Date.prototype.loadSimpleFormat = function(string) {
+        let splitDate = string.split('-');
+        this.setFullYear(splitDate[0])
+        this.setMonth(parseInt(splitDate[1]) - 1)
+        this.setDate(splitDate[2])
+        this.setHours(0, 0, 0, 0);
+
+        return this;
+    };
+
     // LOADING
     useEffect(() => {
         if (!LOADING)
             return;
-        // let loadedEntryList = JSON.parse(`[{"name":"","dates":["2023-07-02T00:00:00.000Z","2023-07-03T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1},{"name":"","dates":["2023-07-11T00:00:00.000Z","2023-07-12T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1}]`);
-        let loadedEntryList = JSON.parse(localStorage.getItem("entryList"));
+        let loadedEntryList = JSON.parse(`[{"name":"Actual real test this time","date":"2023-07-02","repeatType":0,"days":4,"copyCount":1},{"name":"Repeat every monday","date":"2023-07-02","repeatType":1,"days":1,"copyCount":1},{"name":"2nd of every month","date":"2023-07-02","repeatType":2,"days":2,"copyCount":0}]`);
+        // let loadedEntryList = JSON.parse(localStorage.getItem("entryList"));
         let parsedEntryList = [];
         if (loadedEntryList) {
             loadedEntryList.forEach(e => {
@@ -34,23 +54,23 @@ export default function Index() {
             })
         }
 
-        // console.log(parsedEntryList)
+        console.log(parsedEntryList)
         setEntryList(parsedEntryList);
 
-        // let loadedHistoryList = JSON.parse(`[{"name":"","date":"2023-06-02T00:00:00.000Z"},{"name":"","date":"2023-06-03T00:00:00.000Z"},{"name":"","date":"2023-06-04T00:00:00.000Z"},{"name":"","date":"2023-06-05T00:00:00.000Z"}]`);
-        let loadedHistoryList = JSON.parse(localStorage.getItem("historyList"));
+        let loadedHistoryList = JSON.parse(`[{"name":"Actual real test this time","date":"2023-07-02"},{"name":"Repeat every monday","date":"2023-07-02"},{"name":"2nd of every month","date":"2023-07-02"},{"name":"Actual real test this time","date":"2023-07-06"},{"name":"Repeat every monday","date":"2023-07-03"},{"name":"Actual real test this time","date":"2023-07-10"},{"name":"Repeat every monday","date":"2023-07-10"}]`);
+        // let loadedHistoryList = JSON.parse(localStorage.getItem("historyList"));
         let parsedHistoryList = [];
         if (loadedHistoryList) {
             loadedHistoryList.forEach(e => {
                 parsedHistoryList.push(new DisplayEntry().loadSimplifiedDisplayEntry(e));
             })
         }
-
-        // console.log(parsedHistoryList)
+        console.log(parsedHistoryList);
         setHistoryList(parsedHistoryList);
 
         console.log("Loaded")
     }, [])
+
     if (entryList.length == 0) {
         //let loadedEntryList = JSON.parse(`[{"name":"","dates":["2023-07-02T00:00:00.000Z","2023-07-03T00:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1},{"name":"","dates":["2023-07-11T22:00:00.000Z","2023-07-12T22:00:00.000Z"],"repeatType":0,"days":1,"copyCount":1}]`);
         //console.log(loadedEntryList);
@@ -61,25 +81,28 @@ export default function Index() {
     function saveEntryList(newList) {
         setEntryList(newList);
 
-        if (!SAVING)
-            return;
         let simplifiedList = [];
-        console.log(newList)
         newList.forEach(e => {
             simplifiedList.push(e.simplifyEntry())
         })
+        // console.log(JSON.stringify([...simplifiedList]))
+
+        if (!SAVING)
+            return;
         localStorage.setItem("entryList", JSON.stringify([...simplifiedList]));
     }
 
     function saveHistoryList(newList) {
         setHistoryList(newList);
 
-        if (!SAVING)
-            return;
         let simplifiedList = [];
         newList.forEach(e => {
             simplifiedList.push(e.simplifyHistoryEntry())
         })
+        // console.log(JSON.stringify([...simplifiedList]))
+
+        if (!SAVING)
+            return;
         localStorage.setItem("historyList", JSON.stringify([...simplifiedList]));
     }
 
@@ -150,20 +173,15 @@ export default function Index() {
         setEditingForm(state);
         setTimeout(() => setDelayedForm(state), 100);
 
-        if (state) {
+        if (state)
             setEntryToEdit(entry);
-            setActiveStartDate(entry.getBeginningOfMonth());
-        }
-
     }
 
     let [entryToEdit, setEntryToEdit] = useState(new Entry());
-    let [activeStartDate, setActiveStartDate] = useState(new Date());
 
     let formProps = {
         handleSubmit,
         entryToEdit,
-        activeStartDate, setActiveStartDate,
     }
 
     return (
