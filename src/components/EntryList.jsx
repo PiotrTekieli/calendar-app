@@ -31,13 +31,19 @@ function EntryList({ date, entryList, historyList, populateHistory, edit, delete
     return (
         <>
             <button onClick={() => { setShowShort(!showShort) }}>{showShort ? "Show More" : "Show Less"}</button>
-            <table className="w-full min-w-min max-w-[800px]">
+            {/* <table className="w-full min-w-min max-w-[800px]">
                 <tbody>
                     {displayEntryList && displayEntryList.map((entry, i) => {
                         return <ListElement key={entry.id + entry.date} date={date} entry={entry} edit={edit} delete={del} submit={handleSubmit} />
                     })}
                 </tbody>
-            </table>
+            </table> */}
+
+            <div className="w-full min-w-min max-w-[800px] grid grid-cols-[minmax(min-content,_250px)_repeat(2,_minmax(min-content,_100px))]">
+                {displayEntryList && displayEntryList.map((entry, i) => {
+                    return <ListElement key={entry.id + entry.date} date={date} entry={entry} edit={edit} delete={del} submit={handleSubmit} />
+                })}
+            </div>
         </>
     );
 }

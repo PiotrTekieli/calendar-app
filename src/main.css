@@ -16,12 +16,16 @@
   -webkit-text-size-adjust: 100%;
 }
 
+.list-element:hover * {
+  @apply bg-gray-100;
+}
+
 input {
   @apply p-1 m-1 w-52 border border-0 border-b border-gray-800;
 }
 
 button {
-  @apply p-1 px-3 mx-1 border hover:brightness-75;
+  @apply py-0.5 px-3 mx-1 border hover:brightness-75;
 }
 
 button.active {
