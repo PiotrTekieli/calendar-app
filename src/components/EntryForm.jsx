@@ -40,6 +40,7 @@ function EntryForm(props) {
                     detectError = true;
 
                 newEntry.days = days;
+                newEntry.repeatDesc = "Every " + days + " days";
                 break;
             case 1:
                 // days = entry.dates[0].getDay();
@@ -48,12 +49,49 @@ function EntryForm(props) {
                     detectError = true;
                 }
                 days = parseInt(daysOfTheWeek.join(""));
+                newEntry.repeatDesc = "Every ";
+
+                daysOfTheWeek.forEach((day, i) => {
+                    if (i != 0) {
+                        if (i != daysOfTheWeek.length - 1)
+                            newEntry.repeatDesc += ", ";
+                        else
+                            newEntry.repeatDesc += " and ";
+                    }
+
+                    switch(day) {
+                        case 1:
+                            newEntry.repeatDesc += "Mon";
+                            break;
+                        case 2:
+                            newEntry.repeatDesc += "Tue";
+                            break;
+                        case 3:
+                            newEntry.repeatDesc += "Wed";
+                            break;
+                        case 4:
+                            newEntry.repeatDesc += "Thu";
+                            break;
+                        case 5:
+                            newEntry.repeatDesc += "Fri";
+                            break;
+                        case 6:
+                            newEntry.repeatDesc += "Sat";
+                            break;
+                        case 7:
+                            newEntry.repeatDesc += "Sun";
+                            break;
+                    }
+                })
+
                 break;
             case 2:
-                days = entry.dates[0].getDate();
+                days = selectedDate.getDate();
+                newEntry.repeatDesc = days + ((days % 10 == 1 && (days <= 10 || days >= 20)) ? "st" : (days % 10 == 2 && (days <= 10 || days >= 20) ? "nd" : "th")) + " of every month"
                 break;
             case 3:
                 days = -1;
+                newEntry.repeatDesc = "No repeat";
                 break;
         }
 
@@ -110,9 +148,12 @@ function EntryForm(props) {
 
     return (
         <>
-            <div className="form p-3 w-full min-w-min">
+            <div className="form p-3 w-full max-w-[800px] min-w-min">
                 <label className="label">Name: </label>
                 <input type="text" placeholder="Name of the entry" value={entry.name} onChange={(e) => setEntry({...entry, name: e.target.value})} onKeyDown={handleKeyDown} />
+                <br/><br/>
+                <label className="label">Description: </label> <br/>
+                <input className="w-full md:w-[80%]" type="text" placeholder="Description" value={entry.description} onChange={(e) => setEntry({...entry, description: e.target.value})} onKeyDown={handleKeyDown} />
                 <br/><br/>
 
                 <label className="label">Repeat Type: </label>
@@ -131,86 +172,90 @@ function EntryForm(props) {
                     </div>
 
                     <div className="p-3">
-                        <div className="">
-                            <label className="label">Starting Date: </label>
-                            <Calendar ref={dateRef} minDetail="year"
-                            value={selectedDate} onChange={(value) => setSelectedDate(value)}
-                            activeStartDate={activeStartDate} onActiveStartDateChange={(a) => {setActiveStartDate(a.activeStartDate)}} />
-                        </div>
+                        {entry.repeatType != 1 && (
+                            <>
+                                <label className="label">Starting Date: </label>
+                                <Calendar ref={dateRef} minDetail="year"
+                                value={selectedDate} onChange={(value) => setSelectedDate(value)}
+                                activeStartDate={activeStartDate} onActiveStartDateChange={(a) => {setActiveStartDate(a.activeStartDate)}} />
+                                <br/>
+                            </>
+                        )}
+
+                        {entry.repeatType == 0 && (
+                            <>
+                                <label className="label">Day amount: </label>
+                                <input type="number" placeholder="Day amount" value={entry.days} onChange={(e) => { setEntry({...entry, days: e.target.value }) }} id="repeatDays" />
+                                <span className="text-red-500"> {dayInputErrorText}</span>
+                            </>
+                        )}
+                        {entry.repeatType == 1 && (
+                            <>
+                                <label className="label">Days of the week: </label>
+                                <div className="m-3 flex flex-wrap border border-gray-800">
+                                    {Week.map((day, i) => {
+                                        return <Fragment key={i}>
+                                                <button className={(daysOfTheWeek.includes(i + 1) ? "active " : "") + (i != 6 ? "border-r " : "") + "flex-1 m-0 p-2 border-0"} onClick={() => {
+                                                    let offset = i + 1;
+                                                    let index = daysOfTheWeek.findIndex(i => i == offset);
+
+                                                    let newList;
+                                                    if (index == -1) {
+                                                        newList = [...daysOfTheWeek, offset].sort();
+                                                        setDaysOfTheWeek(newList);
+                                                    }
+                                                    else {
+                                                        newList = [...daysOfTheWeek];
+                                                        newList.splice(index, 1);
+                                                        setDaysOfTheWeek(newList);
+                                                    }
+
+                                                    // let today = new Date(new Date().setHours(0, 0, 0, 0));
+
+                                                    // let nextDay = -1;
+                                                    // newList.forEach(d => {
+                                                    //     if (nextDay == -1 && d > today.getDay()) {
+                                                    //         nextDay = d;
+                                                    //     }
+                                                    // })
+                                                    // if (nextDay == -1)
+                                                    //     nextDay = newList[0];
+
+                                                    // let dayDifference = nextDay - today.getDay();
+                                                    // if (dayDifference <= 0)
+                                                    //     dayDifference += 7;
+
+                                                    // let newDate = new Date(today.setDate(today.getDate() + dayDifference))
+
+                                                    // setEntry({...entry, dates: [newDate]});
+                                                    // setNewActiveStartDate(newDate);
+                                                }}>{day}</button>
+                                                {i == 3 && (
+                                                    <span className="basis-[100%] sm:basis-0 h-0 w-0" />
+                                                )}
+                                            </Fragment>
+                                    })}
+                                </div>
+                                <span className="text-red-500"> {dayInputErrorText}</span>
+                            </>
+                        )}
+
+                        <br/>
+
+                        {entry.repeatType != 3 && (
+                            <>
+                                <label className="label">Display Copy Count: </label>
+                                <input type="number" placeholder="Display copy count" value={entry.copyCount} onChange={(e) => setEntry({...entry, copyCount: e.target.value})} onKeyDown={handleKeyDown} />
+                                <span className="text-red-500"> {copyCountErrorText}</span>
+                                <br/>
+                            </>
+                        )}
                     </div>
 
-                    {entry.repeatType == 0 && (
-                        <>
-                            <br/>
-                            <label className="label">Day amount: </label>
-                            <input type="number" placeholder="Day amount" value={entry.days} onChange={(e) => { setEntry({...entry, days: e.target.value }) }} id="repeatDays" />
-                            <span className="text-red-500"> {dayInputErrorText}</span>
-                        </>
-                    )}
-                    {entry.repeatType == 1 && (
-                        <>
-                            <br/>
-                            <div className="m-3 flex flex-wrap border border-gray-800">
-                                {Week.map((day, i) => {
-                                    return <Fragment key={i}>
-                                            <button className={(daysOfTheWeek.includes(i + 1) ? "active " : "") + (i != 6 ? "border-r " : "") + "flex-1 m-0 p-2 border-0"} onClick={() => {
-                                                let offset = i + 1;
-                                                let index = daysOfTheWeek.findIndex(i => i == offset);
-
-                                                let newList;
-                                                if (index == -1) {
-                                                    newList = [...daysOfTheWeek, offset].sort();
-                                                    setDaysOfTheWeek(newList);
-                                                }
-                                                else {
-                                                    newList = [...daysOfTheWeek];
-                                                    newList.splice(index, 1);
-                                                    setDaysOfTheWeek(newList);
-                                                }
-
-                                                let today = new Date(new Date().setHours(0, 0, 0, 0));
-
-                                                let nextDay = -1;
-                                                newList.forEach(d => {
-                                                    if (nextDay == -1 && d > today.getDay()) {
-                                                        nextDay = d;
-                                                    }
-                                                })
-                                                if (nextDay == -1)
-                                                    nextDay = newList[0];
-
-                                                let dayDifference = nextDay - today.getDay();
-                                                if (dayDifference <= 0)
-                                                    dayDifference += 7;
-
-                                                let newDate = new Date(today.setDate(today.getDate() + dayDifference))
-
-                                                setEntry({...entry, dates: [newDate]});
-                                                setNewActiveStartDate(newDate);
-                                            }}>{day}</button>
-                                            {i == 3 && (
-                                                <span className="basis-[100%] sm:basis-0 h-0 w-0" />
-                                            )}
-                                        </Fragment>
-                                })}
-                            </div>
-                            <span className="text-red-500"> {dayInputErrorText}</span>
-                        </>
-                    )}
-
-                    <br/>
-
-                    {entry.repeatType != 3 && (
-                        <>
-                            <label className="label">Display Copy Count: </label>
-                            <input type="number" placeholder="Display copy count" value={entry.copyCount} onChange={(e) => setEntry({...entry, copyCount: e.target.value})} onKeyDown={handleKeyDown} />
-                            <span className="text-red-500"> {copyCountErrorText}</span>
-                            <br/>
-                        </>
-                    )}
                 </div>
 
-                <button onClick={handleClick}>Confirm</button>
+                <br/>
+                <button className="active px-4 py-2" onClick={handleClick}>Save Changes</button>
             </div>
         </>
     );

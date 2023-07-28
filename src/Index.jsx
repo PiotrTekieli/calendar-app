@@ -8,7 +8,7 @@ import Arrow from "./components/Arrow";
 
 
 export default function Index() {
-    const DEBUG_DATE = true;
+    const DEBUG_DATE = false;
     const LOADING = true;
     const SAVING = false;
     const HISTORY_AMOUNT = 30;
@@ -139,6 +139,7 @@ export default function Index() {
     }
 
     function deleteItem(id) {
+        console.log(entryList, historyList);
         let index = entryList.findIndex(entry => entry.id == id)
         console.log(id, entryList, historyList);
 
@@ -191,7 +192,7 @@ export default function Index() {
                     <div className="entry-list absolute">
                         {DEBUG_DATE && (<>Debug Set Date: <input type="date" onChange={e => setToday(e.target.valueAsDate)}/> <button onClick={() => setToday(new Date())}>Reset</button><br/></>)}
 
-                        <button className="bg-blue-400" onClick={editEntry}>New</button>
+                        <button className="active" onClick={editEntry}>New</button>
 
                         <EntryList date={today} entryList={entryList} historyList={historyList} populateHistory={populateHistory} edit={editEntry} delete={deleteItem} submit={handleSubmit}/>
                     </div>

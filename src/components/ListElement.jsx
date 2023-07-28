@@ -14,18 +14,28 @@ function ListElement({ date, entry, edit, delete: del, submit }) {
     const descriptionRef = useRef();
 
     function showDescription() {
-        if (appear) {
+        if (appear)
             descriptionRef.current.style.maxHeight = "0px";
+        else
             setTimeout(() => {
-                setAppear(false);
-            }, 150)
-        }
-        else {
-            setAppear(true);
-            setTimeout(() => {
-                descriptionRef.current.style.maxHeight = "calc(" + descriptionRef.current.scrollHeight + "px + 1.5rem)";
+                descriptionRef.current.style.maxHeight = "max-content";
             })
-        }
+
+        setAppear(!appear)
+
+        // if (appear) {
+        //     descriptionRef.current.style.maxHeight = "0px";
+        //     setTimeout(() => {
+        //         setAppear(false);
+        //     }, 150)
+        // }
+        // else {
+        //     setAppear(true);
+        //     setTimeout(() => {
+        //         // descriptionRef.current.style.maxHeight = "calc(" + descriptionRef.current.scrollHeight + "px + 1.5rem)";
+        //         descriptionRef.current.style.maxHeight = "10000px";
+        //     })
+        // }
     }
 
     return (
@@ -50,16 +60,16 @@ function ListElement({ date, entry, edit, delete: del, submit }) {
                 </tr>
             )} */}
 
-            <div className={(entry.history == true ? "text-gray-400 " : "") + "list-element gap-4 contents cursor-pointer [&>*]:py-3 sm:[&>*]:px-3"} onClick={() => showDescription()}>
-                <div><b>{entry.name == "" ? "Untitled" : entry.name}</b></div>
+            <div className={(entry.history == true ? "text-gray-400 " : "") + "list-element gap-4 contents cursor-pointer [&>*]:py-3 [&>*]:px-1 sm:[&>*]:px-3"} onClick={() => showDescription()}>
+                <div>{entry.name == "" ? "Untitled" : entry.name}</div>
                 <div className="whitespace-nowrap">In {dayDifference} days</div>
                 <div>{formatDate(entry.date)}</div>
-
-
             </div>
+
             {appear && (
-                <div ref={descriptionRef} className="bg-gray-200 col-span-3 flex justify-between items-center transition-all max-h-0 overflow-hidden w-full [&>*]:py-2 sm:[&>*]:px-3">
-                    <div>test</div>
+                <div ref={descriptionRef} className="bg-gray-200 col-span-3 flex justify-between items-center gap-4 max-h-0 overflow-hidden w-full [&>*]:py-2 sm:[&>*]:px-3">
+                    <div className="italic min-w-[60%]">{entry.description == "" ? "No Description" : entry.description}</div>
+                    <div>{entry.repeatDesc}</div>
                     <div className="flex">
                         <div>
                             {!entry.history && (

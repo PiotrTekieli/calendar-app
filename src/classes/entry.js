@@ -5,26 +5,34 @@ class Entry {
     constructor() {
         this.id = uuidv4();
         this.name = "";
+        this.description = "";
 
         this.dates = [new Date(new Date().setHours(0, 0, 0, 0)).simpleFormat()];
         this.repeatType = 0;
+        this.repeatDesc = "";
         this.days = 1;
         this.copyCount = 1;
+
+        this.icon = "";
     }
 
     clone(entry) {
         this.id = entry.id;
         this.name = entry.name;
+        this.description = entry.description;
         this.dates = entry.dates;
         this.repeatType = entry.repeatType;
+        this.repeatDesc = entry.repeatDesc;
         this.days = entry.days;
         this.copyCount = entry.copyCount;
+        this.icon = entry.icon;
 
         return this;
     }
 
     loadSimplifiedEntry(simplifiedEntry) {
         this.name = simplifiedEntry.name;
+        this.description = simplifiedEntry.description;
         this.dates = [simplifiedEntry.date];
         this.repeatType = simplifiedEntry.repeatType;
         this.days = simplifiedEntry.days;
@@ -37,6 +45,7 @@ class Entry {
     simplifyEntry() {
         return {
             name: this.name,
+            description: this.description,
             date: this.dates[0],
             repeatType: this.repeatType,
             days: this.days,
@@ -107,7 +116,7 @@ class Entry {
     getDisplayEntries() {
         let displayEntries = []
         this.dates.forEach(date => {
-            displayEntries.push(new DisplayEntry(this.id, this.name, date))
+            displayEntries.push(new DisplayEntry(date).getDataFromEntry(this))
         })
         return displayEntries;
     }
@@ -116,7 +125,9 @@ class Entry {
         if (today.getTime() - new Date().loadSimpleFormat(this.dates[0]).getTime() > 0) {
             this.addNextDate();
 
-            let displayEntry = new DisplayEntry(undefined, this.name, this.dates[0], true);
+            //let displayEntry = new DisplayEntry(undefined, this.name, this.description, this.dates[0], true);
+            let displayEntry = new DisplayEntry(this.dates[0], true).getDataFromEntry(this);
+            displayEntry.id = uuidv4();
             this.dates.splice(0, 1);
 
             return displayEntry;
